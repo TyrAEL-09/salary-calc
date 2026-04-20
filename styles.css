@@ -39,11 +39,10 @@ body {
 
 .hero,
 .panel {
-  backdrop-filter: blur(14px);
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
 }
 
 .hero {
@@ -170,18 +169,17 @@ h1 {
   padding: 12px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.04);
-  background: linear-gradient(180deg, rgba(16, 29, 25, 0.96), rgba(8, 17, 15, 0.92));
+  background: #0b1412;
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .day-cell:hover {
-  transform: translateY(-2px);
   border-color: var(--accent);
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
 }
 
 .day-cell.muted {
@@ -190,7 +188,7 @@ h1 {
 }
 
 .day-cell.worked {
-  background: linear-gradient(180deg, rgba(0, 168, 107, 0.24), rgba(8, 17, 15, 0.96));
+  background: rgba(0, 168, 107, 0.16);
   border-color: rgba(0, 168, 107, 0.45);
 }
 
@@ -223,7 +221,7 @@ h1 {
   padding: 14px 16px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(16, 29, 25, 0.92), rgba(8, 17, 15, 0.92));
+  background: #0b1412;
 }
 
 .default-card {
@@ -285,7 +283,7 @@ input[type="number"]:focus {
 .empty-state {
   padding: 18px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(16, 29, 25, 0.9), rgba(8, 17, 15, 0.9));
+  background: #0b1412;
   color: var(--muted);
   line-height: 1.5;
 }
@@ -306,9 +304,15 @@ input[type="number"]:focus {
 }
 
 .summary-panel {
-  background:
-    linear-gradient(180deg, rgba(0, 168, 107, 0.1), rgba(8, 17, 15, 0.98)),
-    var(--panel);
+  background: #08110f;
+}
+
+.calendar-panel,
+.summary-panel,
+.default-card,
+.day-form,
+.empty-state {
+  contain: layout paint;
 }
 
 .summary-metric strong {
@@ -345,6 +349,10 @@ input[type="number"]:focus {
 }
 
 @media (max-width: 640px) {
+  body {
+    background: #000000;
+  }
+
   .app-shell {
     width: min(100% - 16px, 1000px);
     margin: 8px auto 18px;
@@ -354,6 +362,7 @@ input[type="number"]:focus {
   .hero {
     padding: 16px;
     border-radius: 18px;
+    box-shadow: none;
   }
 
   h1 {
@@ -384,6 +393,7 @@ input[type="number"]:focus {
     min-height: 74px;
     padding: 8px;
     border-radius: 14px;
+    transition: none;
   }
 
   .day-number {
@@ -433,5 +443,12 @@ input[type="number"]:focus {
 
   .day-pill {
     font-size: 0.68rem;
+  }
+}
+
+@media (hover: none) {
+  .day-cell:hover {
+    border-color: rgba(255, 255, 255, 0.04);
+    box-shadow: none;
   }
 }

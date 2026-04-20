@@ -197,7 +197,16 @@ function renderSelectedDay() {
   hoursWorkedInput.value = entry.custom && entry.hoursWorked !== null ? entry.hoursWorked : hoursWorked;
   hourlyRateInput.disabled = !entry.custom;
   hoursWorkedInput.disabled = !entry.custom;
+  updateSelectedDaySummary();
+}
 
+function updateSelectedDaySummary() {
+  if (!state.selectedDate) {
+    daySummary.textContent = "";
+    return;
+  }
+
+  const { entry, hourlyRate, hoursWorked, subtotal } = getComputedValues(state.selectedDate);
   const description = entry.worked
     ? `Este día suma ${moneyFormatter.format(subtotal)} (${hourlyRate} por hora x ${hoursWorked} horas).`
     : `Este día no se está contando todavía.`;
@@ -249,7 +258,6 @@ function renderAll() {
 
 function refreshCalculatedViews() {
   renderCalendar();
-  renderSelectedDay();
   renderSummary();
 }
 
@@ -311,6 +319,7 @@ workedToggle.addEventListener("change", () => {
   const entry = ensureEntry(state.selectedDate);
   entry.worked = workedToggle.checked;
   refreshCalculatedViews();
+  updateSelectedDaySummary();
 });
 
 customToggle.addEventListener("change", () => {
@@ -328,6 +337,7 @@ customToggle.addEventListener("change", () => {
     entry.hourlyRate = hourlyRate;
     entry.hoursWorked = hoursWorked;
   }
+  renderSelectedDay();
   refreshCalculatedViews();
 });
 
@@ -340,7 +350,10 @@ hourlyRateInput.addEventListener("input", () => {
   entry.custom = true;
   customToggle.checked = true;
   entry.hourlyRate = Number(hourlyRateInput.value) || 0;
+  hourlyRateInput.disabled = false;
+  hoursWorkedInput.disabled = false;
   refreshCalculatedViews();
+  updateSelectedDaySummary();
 });
 
 hoursWorkedInput.addEventListener("input", () => {
@@ -352,7 +365,10 @@ hoursWorkedInput.addEventListener("input", () => {
   entry.custom = true;
   customToggle.checked = true;
   entry.hoursWorked = Number(hoursWorkedInput.value) || 0;
+  hourlyRateInput.disabled = false;
+  hoursWorkedInput.disabled = false;
   refreshCalculatedViews();
+  updateSelectedDaySummary();
 });
 
 setDefaultMonth();
