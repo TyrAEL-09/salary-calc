@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Salario</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Calculadora mensual</p>
+        <h1>Salario por días trabajados</h1>
+        <p class="subtitle">
+          Marca en el calendario los días que trabajaste y define una configuración general
+          por día de la semana. Si un día tuvo horas o tarifa distintas, puedes sobrescribirlo.
+        </p>
+      </div>
+      <div class="month-picker">
+        <label for="monthInput">Mes a calcular</label>
+        <input id="monthInput" type="month">
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel calendar-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Calendario</p>
+            <h2 id="calendarTitle">Mes</h2>
+          </div>
+          <div class="legend">
+            <span><i class="dot worked"></i> Trabajado</span>
+            <span><i class="dot custom"></i> Con ajuste manual</span>
+          </div>
+        </div>
+        <div class="weekdays" id="weekdays"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </section>
+
+      <aside class="side-stack">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Configuración semanal</p>
+              <h2>Valores por defecto</h2>
+            </div>
+          </div>
+          <div class="defaults-list" id="defaultsList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Día seleccionado</p>
+              <h2 id="selectedDateLabel">Elige una fecha</h2>
+            </div>
+          </div>
+
+          <div id="selectedDayEmpty" class="empty-state">
+            Haz click en un día del calendario para marcarlo como trabajado y editar sus valores.
+          </div>
+
+          <form id="dayForm" class="day-form hidden">
+            <label class="checkbox-row">
+              <input type="checkbox" id="workedToggle">
+              <span>Contar este día como trabajado</span>
+            </label>
+
+            <label class="checkbox-row">
+              <input type="checkbox" id="customToggle">
+              <span>Usar configuración personalizada para esta fecha</span>
+            </label>
+
+            <div class="form-grid">
+              <label>
+                Sueldo por hora
+                <input id="hourlyRateInput" type="number" min="0" step="0.01" placeholder="Ej. 25000">
+              </label>
+              <label>
+                Horas trabajadas
+                <input id="hoursWorkedInput" type="number" min="0" step="0.25" placeholder="Ej. 8">
+              </label>
+            </div>
+
+            <p id="daySummary" class="day-summary"></p>
+          </form>
+        </section>
+
+        <section class="panel summary-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Resumen</p>
+              <h2>Total del mes</h2>
+            </div>
+          </div>
+          <div class="summary-metric">
+            <strong id="totalSalary">0</strong>
+            <span id="workedDaysCount">0 días trabajados</span>
+          </div>
+          <div class="summary-details" id="summaryDetails"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
