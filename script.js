@@ -26,6 +26,7 @@ const daySummary = document.getElementById("daySummary");
 const totalSalary = document.getElementById("totalSalary");
 const workedDaysCount = document.getElementById("workedDaysCount");
 const summaryDetails = document.getElementById("summaryDetails");
+const STORAGE_KEY = "salary-calc-state-v1";
 
 const state = {
   currentMonth: "",
@@ -42,6 +43,60 @@ const moneyFormatter = new Intl.NumberFormat("es-PY", {
   currency: "PYG",
   maximumFractionDigits: 0,
 });
+
+function saveState() {
+  const snapshot = {
+    currentMonth: state.currentMonth,
+    selectedDate: state.selectedDate,
+    defaults: state.defaults,
+    entries: state.entries,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return false;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed.defaults) && parsed.defaults.length === 7) {
+      state.defaults = parsed.defaults.map((item) => ({
+        hourlyRate: Number(item.hourlyRate) || 0,
+        hoursWorked: Number(item.hoursWorked) || 0,
+      }));
+    }
+
+    if (parsed.entries && typeof parsed.entries === "object") {
+      state.entries = Object.fromEntries(
+        Object.entries(parsed.entries).map(([dateKey, entry]) => [
+          dateKey,
+          {
+            worked: Boolean(entry.worked),
+            custom: Boolean(entry.custom),
+            hourlyRate: entry.hourlyRate === null || entry.hourlyRate === undefined ? null : Number(entry.hourlyRate) || 0,
+            hoursWorked: entry.hoursWorked === null || entry.hoursWorked === undefined ? null : Number(entry.hoursWorked) || 0,
+          },
+        ]),
+      );
+    }
+
+    if (typeof parsed.currentMonth === "string" && parsed.currentMonth) {
+      state.currentMonth = parsed.currentMonth;
+      monthInput.value = parsed.currentMonth;
+    }
+
+    if (typeof parsed.selectedDate === "string") {
+      state.selectedDate = parsed.selectedDate;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function formatMonthLabel(date) {
   return new Intl.DateTimeFormat("es-ES", {
@@ -261,6 +316,18 @@ function refreshCalculatedViews() {
   renderSummary();
 }
 
+function updateAndPersist(refreshMode = "calculated") {
+  if (refreshMode === "all") {
+    renderAll();
+  } else if (refreshMode === "selected") {
+    renderSelectedDay();
+    refreshCalculatedViews();
+  } else {
+    refreshCalculatedViews();
+  }
+  saveState();
+}
+
 function ensureEntry(dateKey) {
   if (!state.entries[dateKey]) {
     state.entries[dateKey] = {
@@ -286,7 +353,7 @@ defaultsList.addEventListener("input", (event) => {
   }
 
   state.defaults[weekdayIndex][field] = Number(target.value) || 0;
-  refreshCalculatedViews();
+  updateAndPersist();
 });
 
 monthInput.addEventListener("input", () => {
@@ -295,7 +362,7 @@ monthInput.addEventListener("input", () => {
   }
   state.currentMonth = monthInput.value;
   state.selectedDate = null;
-  renderAll();
+  updateAndPersist("all");
 });
 
 calendarGrid.addEventListener("click", (event) => {
@@ -308,7 +375,7 @@ calendarGrid.addEventListener("click", (event) => {
   const entry = ensureEntry(dateKey);
   entry.worked = !entry.worked;
   state.selectedDate = dateKey;
-  renderAll();
+  updateAndPersist("all");
 });
 
 workedToggle.addEventListener("change", () => {
@@ -318,7 +385,7 @@ workedToggle.addEventListener("change", () => {
 
   const entry = ensureEntry(state.selectedDate);
   entry.worked = workedToggle.checked;
-  refreshCalculatedViews();
+  updateAndPersist();
   updateSelectedDaySummary();
 });
 
@@ -337,8 +404,7 @@ customToggle.addEventListener("change", () => {
     entry.hourlyRate = hourlyRate;
     entry.hoursWorked = hoursWorked;
   }
-  renderSelectedDay();
-  refreshCalculatedViews();
+  updateAndPersist("selected");
 });
 
 hourlyRateInput.addEventListener("input", () => {
@@ -352,7 +418,7 @@ hourlyRateInput.addEventListener("input", () => {
   entry.hourlyRate = Number(hourlyRateInput.value) || 0;
   hourlyRateInput.disabled = false;
   hoursWorkedInput.disabled = false;
-  refreshCalculatedViews();
+  updateAndPersist();
   updateSelectedDaySummary();
 });
 
@@ -367,10 +433,18 @@ hoursWorkedInput.addEventListener("input", () => {
   entry.hoursWorked = Number(hoursWorkedInput.value) || 0;
   hourlyRateInput.disabled = false;
   hoursWorkedInput.disabled = false;
-  refreshCalculatedViews();
+  updateAndPersist();
   updateSelectedDaySummary();
 });
 
-setDefaultMonth();
+if (!loadState()) {
+  setDefaultMonth();
+}
 renderWeekdays();
 renderAll();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+  });
+}
